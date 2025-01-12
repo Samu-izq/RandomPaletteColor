@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de paletas de colores</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+            text-align: center;
+        }
+
+        h1 {
+            color: #555;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        input[type="number"] {
+            width: 100px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #palette {
+            margin-top: 20px;
+        }
+
+        #palette div {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, 20px);
+            gap: 2px;
+            justify-content: center;
+        }
+
+        #colors {
+            margin-top: 20px;
+            font-family: monospace;
+            text-align: left;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Generador de Paletas de Colores</h1>
+    <form id="colorForm">
+        <label for="colorCount">Cantidad de colores:</label>
+        <input type="number" id="colorCount" name="colorCount" min="1" value="100" required>
+        <button type="submit">Generar</button>
+    </form>
+
+    <div id="palette"></div>
+    <div>
+        <h1>Codigo de Colores</h1>
+        <pre id="ColorList"
+            style="margin-top: 10px; font-family: Arial, sans-serif; font-size: 14px; white-space: pre-wrap;"></pre>
+        <form id="CopyList">
+            <button type="submit">Copiar en portapapeles</button>
+        </form>
+    </div>
+
+    <script>
+
+        function generateRandomColors(count) {
+            const colors = new Set();
+
+            while (colors.size < count) {
+                const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0")}`;
+                colors.add(randomColor.toUpperCase());
+            }
+
+            return Array.from(colors);
+        }
+
+        function createColorGrid(colors) {
+            var paletteContainer = document.getElementById("palette");
+            paletteContainer.innerHTML = ""; // Eliminar paleta anterior
+
+            var container = document.createElement("div");
+            container.style.display = "grid";
+            container.style.gridTemplateColumns = `repeat(auto-fit, 50px)`;
+            container.style.gap = "5px";
+
+            colors.forEach(color => {
+                const square = document.createElement("input");
+                square.type = "Color";
+                square.style.width = "50px";
+                square.style.height = "50px";
+                square.style.border = "none";
+                square.style.padding = "0";
+                square.style.boxSizing = "border-box";
+                square.value = color;
+                square.addEventListener("mouseover", () => {
+                    square.title = color;
+                });
+
+                square.addEventListener("input", (event) => {
+                    console.log(`Color cambiado a: ${event.target.value}`);
+                    UpdateColorList();
+
+                });
+                container.appendChild(square);
+
+            });
+            paletteContainer.appendChild(container);
+            UpdateColorList();
+        }
+
+        function UpdateColorList() {
+            var ColorListContaniner = document.getElementById("ColorList");
+            ColorListContaniner.innerHTML = "";
+            var ColorsElements = document.querySelectorAll("#palette>div>input");
+            var Colors = Array.from(ColorsElements).map(n => n.value.toUpperCase());
+            ColorListContaniner.textContent = `[ ${Colors.map(color => `"${color}"`).join(", ")} ]`
+        }
+
+
+        document.getElementById("colorForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const colorCount = parseInt(document.getElementById("colorCount").value, 10) || 100;
+            const colors = generateRandomColors(colorCount);
+            createColorGrid(colors);
+        });
+
+        document.getElementById("CopyList").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            var ColorList = document.getElementById("ColorList").innerText;
+           
+
+            navigator.clipboard.writeText(ColorList).then(function () {
+                var message = document.createElement('div');
+                message.textContent = "¡Texto copiado con éxito!";
+                message.style.position = "fixed";
+                message.style.top = "20px"; 
+                message.style.right = "20px"; 
+                message.style.backgroundColor = "#4CAF50";
+                message.style.color = "white";
+                message.style.padding = "10px";
+                message.style.borderRadius = "5px";
+                message.style.fontSize = "16px";
+                document.body.appendChild(message);
+
+                s
+                setTimeout(function () {
+                    message.style.display = 'none';
+                }, 2000);
+            }).catch(function (error) {
+                
+                var message = document.createElement('div');
+                message.textContent = "No se pudo copiar el texto.";
+                message.style.position = "fixed";
+                message.style.top = "20px"; 
+                message.style.right = "20px"; 
+                message.style.backgroundColor = "#f44336";
+                message.style.color = "white";
+                message.style.padding = "10px";
+                message.style.borderRadius = "5px";
+                message.style.fontSize = "16px";
+                document.body.appendChild(message);
+
+                setTimeout(function () {
+                    message.style.display = 'none';
+                }, 2000);
+            });
+        });
+
+
+
+        function preLoadColors() {
+            const randomColors = generateRandomColors(100);
+            createColorGrid(randomColors);
+        }
+
+        preLoadColors();
+
+
+    </script>
+</body>
+
+</html>
